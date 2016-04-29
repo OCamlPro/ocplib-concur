@@ -259,6 +259,8 @@ end) = (struct
       | _ -> assert false in
     port
 
+  let create_server = create
+
   let connect info sockaddr =
     let (addr, port) =
       match sockaddr with
@@ -295,6 +297,7 @@ end) = (struct
 end : sig
 
   val create : loopback:bool -> ?port:int -> S.server_info -> int
+  val create_server : loopback:bool -> ?port:int -> S.server_info -> int
   val connect : S.info -> Unix.sockaddr -> S.info connection
 
 end)

@@ -3960,13 +3960,12 @@ if test "${enable_async+set}" = set; then :
   enableval=$enable_async; OCAML_PKG_async=no
 fi
 
-CONCUR_TARGETS=""
 
 if test "$OCAML_PKG_lwt" = "no"; then
    as_fn_error $? "Please install OCaml package 'lwt'." "$LINENO" 5
 else
    LWT_ENABLED=true
-   CONCUR_TARGETS="${CONCUR_TARGETS} lwt"
+   CONCUR_TARGETS="lwt"
 fi
 
 if test "$OCAML_PKG_async" = "no"; then

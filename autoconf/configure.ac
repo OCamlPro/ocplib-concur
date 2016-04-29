@@ -58,13 +58,12 @@ AC_ARG_ENABLE(lwt,  [  --disable-lwt           to disable lwt],
 AC_CHECK_OCAML_PKG([async])
 AC_ARG_ENABLE(async,[  --disable-async         to disable async],
                        [OCAML_PKG_async=no],[])
-CONCUR_TARGETS=""
 
 if test "$OCAML_PKG_lwt" = "no"; then
    AC_MSG_ERROR([Please install OCaml package 'lwt'.])
 else
    LWT_ENABLED=true
-   CONCUR_TARGETS="${CONCUR_TARGETS} lwt"
+   CONCUR_TARGETS="lwt"
 fi
 
 if test "$OCAML_PKG_async" = "no"; then

@@ -25,39 +25,73 @@
 
 type 'info connection
 
+(* [Concur.info con] extracts the [info] associated with connection
+   [con]. *)
 val info : 'info connection -> 'info
 
-(* [send_message sock msg_id msg_content] *)
+(* [Concur.send_message con msg] sends a message [msg] on connection
+   [con], that is supposed to be already connected. Note that the
+   message is not sent directly on the socket, but embedded in special
+   format that will help the receiver extracts the message again. *)
 val send_message : 'info connection -> string -> unit
 
+(* [Concur.shutdown con] shutdowns a socket, i.e. flushes it as much
+   as possible before closing it. *)
+val shutdown : 'a connection -> unit
+
+(* [Concur.close con] closes a socket. *)
+val close : 'a connection -> unit
+
 (* create sockets either as server or as client *)
-module MakeSocket(S : sig
-  type server_info
-  type info
+module MakeSocket(
+    S : sig
 
-  val connection_info : server_info -> Unix.sockaddr -> info
+      (* [server_info] is the type of the user state of a server. *)
+      type server_info
 
-  (* [connection_handler con ] *)
-  val connection_handler : info connection -> unit
+      (* [info] is the type of the user state of a connection. It is
+         often useful to put in this state whether the connection is
+         connected or not. *)
+      type info
 
-  (* [message_handler con msg_content] *)
-  val message_handler : info connection -> string -> unit
+      (* When a connection is received on a server,
+         [connection_info server_info sockaddr] is called to
+         initialize the user state of this new connection. *)
+      val connection_info : server_info -> Unix.sockaddr -> info
 
-  (* [disconnection_handler info] *)
-  val disconnection_handler : info -> unit
+      (* [connection_handler con] is called when a new connection is
+         established, i.e. either a new connection to a server, or a
+         client [connect] has succeeded. *)
+      val connection_handler : info connection -> unit
+
+      (* [message_handler con msg_content] is called to handle a new
+         message received on an established connection. *)
+      val message_handler : info connection -> string -> unit
+
+      (* [disconnection_handler info] is called when a socket is
+         either disconnected, or when a client [connect] has failed.
+         For [connect], it is the task of the user to discriminate
+         between a failed connect, and a connection that is closed. *)
+      val disconnection_handler : info -> unit
 
 end) : sig
 
-  (* [create ~loopback ~port] returns the [port] *)
+  (* [create_server ~loopback ?port server_info] creates a server on
+     port [port] (possibly 0), on either the loopback address or any
+     interface ([loopback]), with initial state [server_info], and
+     returns the [port] on which the server was bound. *)
+  val create_server : loopback:bool -> ?port:int -> S.server_info -> int
   val create : loopback:bool -> ?port:int -> S.server_info -> int
 
-  (* [connect conn_id sockaddr] connects to the given sockaddr.
-     handlers are called with the conn_id. *)
+  (* [connect info sockaddr] connects to the given [sockaddr]
+     (Unix.ADDR_INET(addr,port), and initializes the connection state
+     with [info]. *)
   val connect : S.info -> Unix.sockaddr -> S.info connection
 
 end
 
-(* create sockets as server only *)
+(* [MakeServer(...)] is a simplified version of [MakeSocket] for
+   a server-only application. *)
 module MakeServer(S : sig
   type server_info
   type info
@@ -75,12 +109,13 @@ module MakeServer(S : sig
 
 end) : sig
 
-  (* [create ~loopback ~port] returns the [port] *)
+  (* Same as [MakeSocket(...).create_server *)
   val create : loopback:bool -> ?port:int -> S.server_info -> int
 
 end
 
-(* create sockets as client only *)
+(* [MakeClient(...)] is a simplified version of [MakeSocket] for
+   a client-only application. *)
 module MakeClient(S : sig
 
   type info
@@ -102,16 +137,12 @@ end) : sig
 
 end
 
-val shutdown : 'a connection -> unit
-val close : 'a connection -> unit
+
+
+
+
 
 (* PROCESSES *)
-
-
-
-(* [system command exit_handler]
-val system : string -> (Unix.process_status -> unit) -> unit
-*)
 
 (* [exec exe_name args exit_handler], filenames can be specified to be
    read for stdin, and written for stdout/stderr. Can raise an error if
