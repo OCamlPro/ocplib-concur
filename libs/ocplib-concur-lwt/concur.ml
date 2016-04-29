@@ -244,6 +244,8 @@ end) = (struct
     Lwt.async iter_accept;
     port
 
+  let create_server = create
+
   let connect info sockaddr =
     let fd = Lwt_unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
     let writer = Lwt.return () in
@@ -274,6 +276,7 @@ end) = (struct
 end : sig
 
   val create : loopback:bool -> ?port:int -> S.server_info -> int
+  val create_server : loopback:bool -> ?port:int -> S.server_info -> int
   val connect : S.info -> Lwt_unix.sockaddr -> S.info connection
 
 end)

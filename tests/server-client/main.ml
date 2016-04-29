@@ -60,7 +60,7 @@ module Socket = Concur.MakeSocket(struct
 let _ =
   begin
     if Array.length Sys.argv = 1 then begin
-      let port = Socket.create  ~loopback:true "I am the server" in
+      let port = Socket.create_server  ~loopback:true "I am the server" in
       Printf.eprintf "Started on port %d\n%!" port
     end else
       let addr = Unix.inet_addr_of_string "127.0.0.1" in
