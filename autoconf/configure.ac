@@ -8,6 +8,7 @@
 #                                                     #
 #######################################################
 AC_INIT(ocplib-concur,0.1)
+CONFIGURE_ARGS=$*
 AC_COPYRIGHT(Copyright 2016 OCamlPro SAS)
 OCAML_MINIMAL_VERSION=3.12.1
 AC_CONFIG_MACRO_DIR([m4])
@@ -17,9 +18,16 @@ AC_ARG_ENABLE(version-check,
  [VERSION_CHECK="$enableval"],
  [VERSION_CHECK="yes"])
 
+AC_ARG_ENABLE(bin-annot,
+ [  --disable-bin-annot            do not use -bin-annot],
+ [OCAML_USE_BINANNOT=false],
+ [OCAML_USE_BINANNOT=true])
+
 AC_PROG_CC
 
 AC_PROG_OCAML
+
+ROOTDIR=$(dirname $(pwd))
 
 AX_SPLIT_VERSION(OCAMLVERSION)
 OCAML_MAJOR_VERSION=$AX_MAJOR_VERSION
@@ -34,6 +42,10 @@ if test "$VERSION_CHECK" = "yes" ; then
   AX_COMPARE_VERSION( [$OCAMLVERSION], [lt], [${OCAML_MINIMAL_VERSION}],
   AC_MSG_ERROR([Your version of OCaml: $OCAMLVERSION is not supported. You need ${OCAML_MINIMAL_VERSION} at least.]))
 fi
+
+AX_COMPARE_VERSION( [$OCAMLVERSION], [lt], [4.03.0],
+  [OCAML_USE_POSIX_TYPES=undef], [OCAML_USE_POSIX_TYPES=define])
+AC_SUBST(OCAML_USE_POSIX_TYPES)
 
 case "$OCAMLLIB" in
   */lib/ocaml)
@@ -94,17 +106,16 @@ AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLOPT)
 AC_SUBST(OCAMLDEP)
 AC_SUBST(OCAMLBIN)
-AC_PROG_FINDLIB
 if test "$OCAMLFIND" = "no"; then
    AC_MSG_ERROR([You must install OCaml package 'ocamlfind'])
+fi
+AC_CHECK_TOOL([OCAML_TOOL_ocp_build],[ocp-build],[no])
+if test "$OCAML_TOOL_ocp_build" = "no"; then
+   AC_MSG_ERROR([Please install OCaml tool 'ocp-build'.])
 fi
 AC_CHECK_OCAML_PKG(ocplib-endian)
 if test "$OCAML_PKG_ocplib_endian" = "no"; then
    AC_MSG_ERROR([Please install OCaml package 'ocplib-endian'.])
-fi
-AC_CHECK_OCAML_PKG(ocp-build)
-if test "$OCAML_PKG_ocp_build" = "no"; then
-   AC_MSG_ERROR([Please install OCaml package 'ocp-build'.])
 fi
 AC_CHECK_OCAML_PKG([lwt])
 AC_ARG_ENABLE(lwt,  [  --disable-lwt           to disable lwt],
@@ -141,6 +152,7 @@ fi
 AC_SUBST(CONCUR_TARGETS)
 AC_SUBST(OCAMLFIND)
 AC_SUBST(CONFIGURE_ARGS)
+AC_SUBST(ROOTDIR)
 AC_SUBST(prefix)
 AC_SUBST(exec_prefix)
 AC_SUBST(bindir)
@@ -162,5 +174,23 @@ AC_SUBST(OCAMLBIN)
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(CONCUR_TARGETS)
-AC_CONFIG_FILES(Makefile.config config.ocpgen)
+AC_SUBST(OCAML_USE_BINANNOT)
+AC_SUBST(lwt_ENABLED)
+AC_SUBST(async_ENABLED)
+AC_CONFIG_FILES(Makefile.config config.ocpgen ocaml-config.h)
 AC_OUTPUT
+
+echo
+echo "Summary:"
+echo "prefix=${prefix}"
+echo "exec_prefix=${exec_prefix}"
+echo "bindir=${bindir}"
+echo "   (Executables will be installed there)"
+echo "libdir=${libdir}"
+echo "ocamldir=${ocamldir}"
+echo "   (OCaml files will be installed there)"
+echo "metadir=${metadir}"
+echo "   (META files will be installed there)"
+echo "datarootdir=${datarootdir}"
+echo "mandir=${mandir}"
+echo "   (Manual pages will be installed there)"

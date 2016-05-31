@@ -22,7 +22,7 @@
 begin library "ocplib-concur-lwt-dir"
 end
 
-if lwt_ENABLED then {
+if lwt_enabled then {
 begin library "ocplib-concur-lwt"
     files = [ "concur.ml" ]
     requires = [ "lwt.unix" "ocplib-endian" string_compat ]

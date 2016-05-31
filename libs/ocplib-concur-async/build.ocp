@@ -19,7 +19,7 @@
 (**************************************************************************)
 
 
-if async_ENABLED then {
+if async_enabled then {
   begin library "ocplib-concur-async";
     files = ["concur.mli" "concur.ml" ];
     requires = [ "async" "ocplib-endian" string_compat ];
