@@ -21,8 +21,8 @@
 if include "autoconf/config.ocpgen" then {
 
 } else {
-  LWT_ENABLED=false
-  ASYNC_ENABLED=false
+  lwt_ENABLED=false
+  async_ENABLED=false
 }
 
 if ocaml_version = "4.01.0+ocp1" || ocaml_version = "4.02.1+ocp1" then {
