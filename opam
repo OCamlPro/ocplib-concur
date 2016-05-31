@@ -20,9 +20,14 @@ remove: [
 ]
 depends: [
     "ocp-build" {>= "1.99.14-beta" }
+    "base-unix"
     "lwt"  {>= "2.3.2" }
+    "ocplib-endian"
   ]
 depopts: [
-    "async" {>= "111.25.0" }
+    "async"
+]
+conflicts: [
+    "async" {< "111.25.0" }
 ]
 available: [ocaml-version >= "4.01.0"]

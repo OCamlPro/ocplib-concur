@@ -1,0 +1,15 @@
+if test "$OCAML_PKG_lwt" = "no"; then
+  if test "$OCAML_PKG_async" = "no"; then
+    AC_MSG_ERROR([Please install OCaml package 'lwt' or 'async'.])
+  else
+    CONCUR_TARGETS="async"
+  fi
+else
+  if test "$OCAML_PKG_async" = "no"; then
+    CONCUR_TARGETS="lwt"
+  else
+    CONCUR_TARGETS="lwt async"
+  fi
+fi
+
+AC_SUBST(CONCUR_TARGETS)
